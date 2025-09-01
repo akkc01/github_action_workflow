@@ -19,6 +19,7 @@ jobs:
   terraform-init-plan:
     name: Terraform Init, Validate, and Plan
     runs-on: self-hosted
+    environment: dev 
     steps:
       - name: Clone Repository
         uses: actions/checkout@v5
@@ -79,5 +80,6 @@ jobs:
       - name: Terraform Apply
         run: terraform apply --auto-approve
         working-directory: ${{ env.workdir }}
+
 
 
