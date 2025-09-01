@@ -1,0 +1,23 @@
+name: Resorce Group will be create.
+
+on:
+  push:
+    branches:
+    - main
+    - feature/*
+    
+  workflow_dispatch:
+
+  
+jobs:
+ ubuntu-job-test:
+    name: deploy to staging
+    runs-on: ubuntu-22.04
+    steps:
+      - name: print host name
+        run: uname -a
+    
+    
+
+    
+    
