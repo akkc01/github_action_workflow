@@ -1,11 +1,10 @@
-name: Resorce Group will be create.
+name: Create Resource Group
 
 on:
   push:
     branches:
-    - main
-    - feature/*
-    
+      - main
+      - feature/*
   workflow_dispatch:
 
 permissions:
@@ -15,36 +14,67 @@ permissions:
 env:
   workdir: environment/dev
 
-  
 jobs:
- terraform-init-plan:
-    name: Terraform init validate plan
-    #runs-on: [ self-hosted, Windows, X64, ghatest, manish ]
+  terraform-init-plan:
+    name: Terraform Init, Validate, and Plan
     runs-on: self-hosted
     steps:
-      
-      - name: clone repo.
+      - name: Clone Repository
         uses: actions/checkout@v5
-        
-      - name: AZ Login
+
+      - name: Azure Login
         uses: Azure/login@v2.3.0
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Terraform fmt
+      - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
         working-directory: ${{ env.workdir }}
-        
+
       - name: Terraform Init
         id: init
-        run: terraform init -input=false  
+        run: terraform init -input=false
         working-directory: ${{ env.workdir }}
 
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ env.workdir }}
 
-    
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -out=tfplan.out
+        working-directory: ${{ env.workdir }}
 
+  terraform-apply:
+    name: Terraform Apply
+    needs: terraform-init-plan
+    runs-on: self-hosted
 
+    # ✅ Approval required before running this job
+    environment:
+      name: dev
+      # Add protection rules to this environment in GitHub to require manual approval
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v5
+
+      - name: Azure Login
+        uses: Azure/login@v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ${{ env.workdir }}
+
+      - name: Terraform Apply
+        run: terraform apply --auto-approve
+        working-directory: ${{ env.workdir }}
