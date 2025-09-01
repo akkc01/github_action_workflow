@@ -7,7 +7,6 @@ on:
       - feature/*
   workflow_dispatch:
 
-
 permissions:
   id-token: write
   contents: read
@@ -16,7 +15,7 @@ env:
   workdir: environment/dev
 
 jobs:
-  terraform-init-plan:
+  Infra-Build:
     name: Terraform Init, Validate, and Plan
     runs-on: self-hosted
     steps:
@@ -51,16 +50,20 @@ jobs:
         run: terraform plan
         working-directory: ${{ env.workdir }}
 
-  terraform-apply:
+  Deployment-Approval:
+    name:  Manual Approval Step
+    needs: Infra-Build
+    runs-on: ubuntu-latest
+    environment:
+      name: Deployment approval Needed  # GitHub pe 'approval' environment banao, add reviewers
+    steps:
+      - name: Wait for Manual Approval
+        run: echo "Waiting for manual approval..."
+
+  Infra-Deployment:
     name: Terraform Apply
-    needs: terraform-init-plan
+    needs: Deployment-Approval
     runs-on: self-hosted
-
-    # # ✅ Approval required before running this job
-    # environment:
-    #   name: dev
-    #   # Add protection rules to this environment in GitHub to require manual approval
-
     steps:
       - name: Clone Repository
         uses: actions/checkout@v5
@@ -79,7 +82,3 @@ jobs:
       - name: Terraform Apply
         run: terraform apply --auto-approve
         working-directory: ${{ env.workdir }}
-
-
-
-
