@@ -19,7 +19,6 @@ jobs:
   terraform-init-plan:
     name: Terraform Init, Validate, and Plan
     runs-on: self-hosted
-    environment: dev 
     steps:
       - name: Clone Repository
         uses: actions/checkout@v5
@@ -57,10 +56,10 @@ jobs:
     needs: terraform-init-plan
     runs-on: self-hosted
 
-    # ✅ Approval required before running this job
-    environment:
-      name: dev
-      # Add protection rules to this environment in GitHub to require manual approval
+    # # ✅ Approval required before running this job
+    # environment:
+    #   name: dev
+    #   # Add protection rules to this environment in GitHub to require manual approval
 
     steps:
       - name: Clone Repository
@@ -80,6 +79,7 @@ jobs:
       - name: Terraform Apply
         run: terraform apply --auto-approve
         working-directory: ${{ env.workdir }}
+
 
 
 
