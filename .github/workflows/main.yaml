@@ -8,16 +8,39 @@ on:
     
   workflow_dispatch:
 
+
+env:
+  workdir: environment/dev
+
   
 jobs:
- ubuntu-job-test:
-    name: deploy to staging
-    runs-on: ubuntu-22.04
+ terraform-init-plan:
+    name: Terraform init validate plan
+    #runs-on: [ self-hosted, Windows, X64, ghatest, manish ]
+    runs-on: self-hosted
     steps:
-      - name: print host name
-        run: uname -a
-    
-    
+      
+      - name: clone repo.
+        uses: actions/checkout@v5
+        
+      - name: AZ Login
+        uses: Azure/login@v2.3.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+        working-directory: ${{ env.workdir }}
+        
+      - name: Terraform Init
+        id: init
+        run: terraform init -input=false  
+        working-directory: ${{ env.workdir }}
+
 
     
-    
+
