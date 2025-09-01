@@ -47,7 +47,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false -out=tfplan.out
+        run: terraform plan
         working-directory: ${{ env.workdir }}
 
   terraform-apply:
@@ -78,3 +78,4 @@ jobs:
       - name: Terraform Apply
         run: terraform apply --auto-approve
         working-directory: ${{ env.workdir }}
+
